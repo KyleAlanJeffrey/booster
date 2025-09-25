@@ -1,9 +1,11 @@
-# Booster Robotics SDK
+# Cage Fight Booster Robotics SDK
 An adjust of the Booster Robotics SDK to support python binding and some examples.
 
 Booster Robotics SDK aims to provide a simple and easy-to-use interface for developers to control the Booster Robotics products. 
 
 ## Installation
+In the booster_robotics_sdk directory, run the following command to install the dependencies:
+
 ```bash
 ./install.sh
 ```
@@ -12,23 +14,9 @@ Booster Robotics SDK aims to provide a simple and easy-to-use interface for deve
 ./build.sh
 ```
 
-## Run examples
-### 1. run b1_arm_sdk_example_client locally
-```
-cd build
-./b1_arm_sdk_example_client 127.0.0.1
-```
-### 2. run b1_7dof_arm_sdk_example_client locally
-```
-cd build
-./b1_7dof_arm_sdk_example_client 127.0.0.1
-```
-### 3. run other example xxx locally
-```
-cd build
-./xxx 127.0.0.1
-```
-
+## Using w/ Simulator
+Use this guide to install the webbots simulator. Download their robot files and interface using this project with the correct network interface. 
+https://booster.feishu.cn/wiki/DtFgwVXYxiBT8BksUPjcOwG4n4f#doxcnVlUn0say5S45a17WO5efPd
 
 ## License
 
