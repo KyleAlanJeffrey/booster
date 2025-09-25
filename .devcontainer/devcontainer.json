@@ -1,19 +1,32 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/docker-existing-dockerfile
 {
-  "name": "Existing Dockerfile",
+  "name": "Booster SDK Environment",
   "build": {
     // Sets the run context to one level up instead of the .devcontainer folder.
     "context": "..",
     // Update the 'dockerFile' property if you aren't using the standard 'Dockerfile' filename.
     "dockerfile": "../Dockerfile"
-  }
+  },
+
+  // --- Shared/host networking (Linux-only) ---
+  // Use host networking so the container shares the host's network interfaces.
+  // Not supported on Docker Desktop (macOS/Windows).
+  "runArgs": [
+    "--network=host",
+
+    // Optional: allow creating/managing virtual interfaces (e.g., TUN/TAP, router sims).
+    // Comment these out if you don't need them.
+    "--cap-add=NET_ADMIN",
+    "--device=/dev/net/tun"
+  ],
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {},
 
-  // Use 'forwardPorts' to make a list of ports inside the container available locally.
-  // "forwardPorts": [],
+  // Fallback for Docker Desktop (no host networking): forward specific ports.
+  // Add any services you want accessible on the host while developing.
+  // "forwardPorts": [8080, 3000, 5000],
 
   // Uncomment the next line to run commands after the container is created.
   // "postCreateCommand": "cat /etc/os-release",
