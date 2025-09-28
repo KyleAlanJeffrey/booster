@@ -18,11 +18,6 @@ In the booster_robotics_sdk directory, run the following command to install the 
 Use this guide to install the webbots simulator. Download their robot files and interface using this project with the correct network interface. 
 https://booster.feishu.cn/wiki/DtFgwVXYxiBT8BksUPjcOwG4n4f#doxcnVlUn0say5S45a17WO5efPd
 
-## License
 
-This project is licensed under the Apache License, Version 2.0. See the LICENSE file for details.
-
-This project uses the following third-party libraries:
-- fastDDS (Apache License 2.0)
-- pybind11 (BSD 3-Clause License)
-- pybind11-stubgen (MIT License)
+# Developing:
+All the Python API is defined in booster_robotics_sdk-main/python/binding.cpp. I've tried to outline the usable functions in bot.ipynb. 
