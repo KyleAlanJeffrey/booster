@@ -1,9 +1,10 @@
-# Cage Fight Booster Robotics SDK
-An adjust of the Booster Robotics SDK to support python binding and some examples.
+# Working Booster Python Stuff
+## Python Code
+In booster-control theres examples of working python code.
 
-Booster Robotics SDK aims to provide a simple and easy-to-use interface for developers to control the Booster Robotics products. 
+The jupyter notebook has an example of doing arm commands. These use low level motor controls to move the arm. THE ROBOT MUST BE IN END EFFECTOR MODE ON THE GROUND TO USE THESE COMMANDS.
 
-## Installation
+## Getting Docker Container Working(Experimenntal)
 In the booster_robotics_sdk directory, run the following command to install the dependencies:
 
 ```bash
@@ -12,6 +13,7 @@ In the booster_robotics_sdk directory, run the following command to install the 
 ## Build C++ SDK and examples
 ```bash
 ./build.sh
+
 ```
 
 ## Using w/ Simulator
