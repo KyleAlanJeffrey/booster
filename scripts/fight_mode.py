@@ -319,7 +319,6 @@ if __name__ == "__main__":
 
     sub = B1RemoteControllerStateSubscriber(on_remote)
     sub.InitChannel()
-    logger.info("Subscribed:", sub.GetChannelName())
 
     # --- clean, signal-friendly blocker ---
     stop = threading.Event()
