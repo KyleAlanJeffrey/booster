@@ -1,9 +1,18 @@
 # Working Booster Python Stuff
-## Python Code
-In booster-control theres examples of working python code.
+The `booster_robotics_sdk-main` is the sdk supplied by the manufacturer. The `booster_python_client` is a my custom wrapper written around the sdk to make usage of the robot easier. To use the current standard fight mode you can either run:
 
-The jupyter notebook has an example of doing arm commands. These use low level motor controls to move the arm. THE ROBOT MUST BE IN END EFFECTOR MODE ON THE GROUND TO USE THESE COMMANDS.
+`python3 -m booster_python_client`
 
+or if that fails run:
+
+`python3 scripts/fight_mode.py`
+
+The booster.ipynb has some simple use cases for changing the modes and such.
+
+
+You NEED TO MAKE SURE TO EXIT THE PROGRAM AFTER RUNNING IT AS THERE WILL BE A LINGERING CONTROLLER SUBSCRIBER IF YOU DO NOT.
+
+# Auxiliary Stuff (PROBABLY NOT IMPORTANT TO YOU)
 ## Getting Docker Container Working(Experimenntal)
 In the booster_robotics_sdk directory, run the following command to install the dependencies:
 
