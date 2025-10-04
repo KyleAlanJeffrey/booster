@@ -18,9 +18,8 @@ from booster_robotics_sdk_python import (
     LowState
 )
 
-from booster_python_client.helpers import stringify_motor_cmds, stringify_q_values
+from .helpers import stringify_motor_cmds, stringify_q_values
 
-DEG_TO_RAD = math.pi / 180.0
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("booster_python_client")

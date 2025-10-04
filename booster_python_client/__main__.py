@@ -1,5 +1,4 @@
 import logging
-import math
 import signal
 import threading
 
@@ -8,8 +7,8 @@ from booster_robotics_sdk_python import (
     RemoteControllerState,
 )
 
-from booster_python_client.actions import RIGHT_PUNCH, LEFT_PUNCH
-from booster_python_client.lib import BoosterLowLevelController
+from .actions import RIGHT_PUNCH, LEFT_PUNCH
+from .lib import BoosterLowLevelController
 
 
 logging.basicConfig(level=logging.INFO)
