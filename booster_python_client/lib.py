@@ -15,6 +15,7 @@ from booster_robotics_sdk_python import (
     ChannelFactory,
     B1LocoClient,
     RobotMode,
+    LowState
 )
 
 from booster_python_client.helpers import stringify_motor_cmds, stringify_q_values
@@ -102,7 +103,7 @@ def get_joint_name_by_index(index: int) -> str:
 
 @dataclass
 class BoosterLowLevelController:
-    low_state_msg = None
+    low_state_msg: LowState = None
 
     def init(self, network_domain=0, network_interface=""):
         # initialize publisher
@@ -126,12 +127,12 @@ class BoosterLowLevelController:
         logger.info("Closing BoosterLowLevelController")
         self.pub.CloseChannel()
 
-    def _grab_low_state_handler(self, msg):
+    def _grab_low_state_handler(self, msg: LowState):
         self.low_state_msg = msg
 
     def read_latest_low_state(self, motor_indices: List[int]) -> str:
-        # wait up to ~1s to get one packet
-        for _ in range(500):
+        # wait up to ~10s to get one packet
+        for _ in range(1000):
             if self.low_state_msg is not None:
                 break
             time.sleep(0.01)
