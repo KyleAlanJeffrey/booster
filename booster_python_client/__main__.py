@@ -1,3 +1,4 @@
+import argparse
 import logging
 import signal
 import threading
@@ -23,6 +24,19 @@ EVENT_AXIS, EVENT_HAT, EVENT_BTN_DN, EVENT_BTN_UP, EVENT_REMOVE = (
 )
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Fight Mode FSM Controller")
+    parser.add_argument(
+        "--speed",
+        type=str,
+        default="medium",
+        help="Motion speed setting (slow, medium, fast)",
+    )
+
+    args = parser.parse_args()
+    logger.info(f"Using speed setting: {args.speed}")
+    if args.speed not in ("slow", "medium", "fast"):
+        raise ValueError("Invalid speed setting")
+
     robot = BoosterLowLevelController()
     robot.init(network_interface="")
 
@@ -32,9 +46,9 @@ if __name__ == "__main__":
         ev = rc.event
         if ev == EVENT_BTN_DN:
             if rc.x:
-                robot.send_command(RIGHT_PUNCH, speed="slow", time_gap_s=0.05)
+                robot.send_command(RIGHT_PUNCH, speed=args.speed, time_gap_s=0.05)
             if rc.y:
-                robot.send_command(LEFT_PUNCH, speed="slow", time_gap_s=0.05)
+                robot.send_command(LEFT_PUNCH, speed=args.speed, time_gap_s=0.05)
 
     sub = B1RemoteControllerStateSubscriber(on_remote)
     sub.InitChannel()
