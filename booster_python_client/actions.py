@@ -27,13 +27,10 @@ LEFT_PUNCH = [
     (-0.6106, -1.3127, 0.3962, -1.9499, -0.7574, 1.2993, 0.4950, 2.0636),
 ]
 
-NEUTRAL_POSE = [
-    (-0.7731, -1.5091, 0.4984, -1.7519, -0.7349, 1.3306, 0.4927, 1.9625),
-]
 
-BLOCK_POSE = [
-    (-0.4000, -1.3000, 0.3000, -1.9000, -0.6000, 1.2000, 0.6000, 2.1000),
-]
+FIGHT_POSE_TO_BLOCK = []
+
+BLOCK_TO_FIGHT_POSE = []
 
 for i in range(len(RIGHT_PUNCH)):
     RIGHT_PUNCH[i] = tuple_to_joint_dict(
@@ -45,12 +42,12 @@ for i in range(len(LEFT_PUNCH)):
         LEFT_RIGHT_ARM_TORSO_JOINTS_INDICES, LEFT_PUNCH[i]
     )
 
-for i in range(len(NEUTRAL_POSE)):
-    NEUTRAL_POSE[i] = tuple_to_joint_dict(
-        LEFT_RIGHT_ARM_TORSO_JOINTS_INDICES, NEUTRAL_POSE[i]
+for i in range(len(FIGHT_POSE_TO_BLOCK)):
+    FIGHT_POSE_TO_BLOCK[i] = tuple_to_joint_dict(
+        LEFT_RIGHT_ARM_TORSO_JOINTS_INDICES, FIGHT_POSE_TO_BLOCK[i]
     )
 
-for i in range(len(BLOCK_POSE)):
-    BLOCK_POSE[i] = tuple_to_joint_dict(
-        LEFT_RIGHT_ARM_TORSO_JOINTS_INDICES, BLOCK_POSE[i]
+for i in range(len(BLOCK_TO_FIGHT_POSE)):
+    BLOCK_TO_FIGHT_POSE[i] = tuple_to_joint_dict(
+        LEFT_RIGHT_ARM_TORSO_JOINTS_INDICES, BLOCK_TO_FIGHT_POSE[i]
     )

@@ -1,131 +1,25 @@
 from enum import Enum
 import logging
-from typing import Literal
+from typing import Dict, List
 
-from booster_python_client.types import SpeedType
+from .types import SpeedType
 from . import actions
 from .lib import BoosterLowLevelController
+from booster_robotics_sdk_python import B1JointIndex
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("booster_python_client")
 
 
-class Event:
-    """
-    An Event is an object that is used to trigger transitions in the state
-    machine. Events are processed by the current state, which will then
-    determine if a transition should be made.
-    """
-
-    def __init__(self, name):
-        self.name = name
-
-    def action(self, booster: BoosterLowLevelController, speed: SpeedType):
-        """
-        The action that is performed when this event is processed.
-        """
-        pass
+class RobotEvent(Enum):
+    LEFT_PUNCH = "left_punch"
+    RIGHT_PUNCH = "right_punch"
+    BLOCK = "block"
 
 
-class State:
-    """
-    We define a state object which provides some utility functions for the
-    individual states within the state machine.
-    """
-
-    def __init__(self):
-        print("Processing current state:", str(self))
-        self.processed_action = False
-
-    def action(
-        self, booster: BoosterLowLevelController, speed: SpeedType, time_gap_s: float
-    ):
-        """
-        The action that is performed when entering the state.
-        """
-        pass
-
-    def on_event(self, event):
-        """
-        Handle events that are delegated to this State.
-        """
-        pass
-
-    def __repr__(self):
-        """
-        Leverages the __str__ method to describe the State.
-        """
-        return self.__str__()
-
-    def __str__(self):
-        """
-        Returns the name of the State.
-        """
-        return self.__class__.__name__
-
-
-### EVENTS ###
-class RightPunch(Event):
-    def __init__(self):
-        super().__init__("right_punch")
-
-    def action(
-        self, booster: BoosterLowLevelController, speed: SpeedType, time_gap_s: float
-    ):
-        logger.info("Right Punch!")
-        booster.send_command(actions.RIGHT_PUNCH, speed=speed, time_gap_s=time_gap_s)
-
-
-class LeftPunch(Event):
-    def __init__(self):
-        super().__init__("left_punch")
-
-    def action(
-        self,
-        booster: BoosterLowLevelController,
-        speed: SpeedType,
-        time_gap_s: float,
-    ):
-        logger.info("Left Punch!")
-        booster.send_command(actions.LEFT_PUNCH, speed=speed, time_gap_s=time_gap_s)
-
-
-class Block(Event):
-    def __init__(self):
-        super().__init__("block")
-
-
-### STATES ###
-class FightStance(State):
-    def action(
-        self, booster: BoosterLowLevelController, speed: SpeedType, time_gap_s: float
-    ):
-        logger.info("Entering fight stance")
-        booster.send_command(actions.NEUTRAL_POSE, speed=speed, time_gap_s=time_gap_s)
-
-    def on_event(self, event: Event):
-        if event.name == "block":
-            return BlockStance()
-        elif event.name == "left_punch":
-            return self
-        if event.name == "right_punch":
-            return self
-
-
-class BlockStance(State):
-
-    def action(
-        self, booster: BoosterLowLevelController, speed: SpeedType, time_gap_s: float
-    ):
-        logger.info("Entering block stance")
-        booster.send_command(actions.BLOCK_POSE, speed=speed, time_gap_s=time_gap_s)
-
-    def on_event(self, event: Event):
-        if event.name == "block":
-            return FightStance()
-        elif event.name == "left_punch" or event.name == "right_punch":
-            logger.info("Can't punch while blocking!")
-            return self
+class RobotState(Enum):
+    FIGHT_STANCE = "fight_stance"
+    BLOCK_STANCE = "block_stance"
 
 
 class FightingStateMachine:
@@ -134,24 +28,41 @@ class FightingStateMachine:
     def __init__(
         self,
         booster: BoosterLowLevelController,
-        speed: Literal["slow", "medium", "fast"] = "medium",
+        speed: SpeedType = "medium",
         time_gap_s: float = 0.05,
     ):
         self.booster = booster
         self.speed = speed
         self.time_gap_s = time_gap_s
-        self.state = FightStance()
+        self.state = RobotState.FIGHT_STANCE
 
-    def on_event(self, event: Event):
-        """
-        This is the main event processor which delegates to the current state
-        and updates the current state based on the result.
-        """
-        # Run the events action
-        event.action(self.booster, speed=self.speed, time_gap_s=self.time_gap_s)
+    def _action(self, action: List[Dict[B1JointIndex, float]]):
+        self.booster.send_command(action, speed=self.speed, time_gap_s=self.time_gap_s)
 
-        # Transition to the next state
-        self.state = self.state.on_event(event)
+    def on_event(self, event: RobotEvent):
 
-        # Perform the action of the new state
-        self.state.action(self.booster, speed=self.speed, time_gap_s=self.time_gap_s)
+        ######### Fighting state #########
+        if self.state == RobotState.FIGHT_STANCE:
+            # Switch to block stance
+            if event == RobotEvent.BLOCK:
+                self._action(actions.FIGHT_POSE_TO_BLOCK)
+                self.state = RobotState.BLOCK_STANCE
+
+            elif event == RobotEvent.LEFT_PUNCH:
+                self._action(actions.LEFT_PUNCH)
+
+            elif event == RobotEvent.RIGHT_PUNCH:
+                self._action(actions.RIGHT_PUNCH)
+
+            else:
+                logger.info(f"Cant {event.value} while fighting!")
+
+        ######### Blocking state #########
+        elif self.state == RobotState.BLOCK_STANCE:
+            # Switch back to fight stance
+            if event == RobotEvent.BLOCK:
+                self._action(actions.BLOCK_TO_FIGHT_POSE)
+                self.state = RobotState.FIGHT_STANCE
+
+            else:
+                logger.info(f"Can't {event.value} while blocking!")

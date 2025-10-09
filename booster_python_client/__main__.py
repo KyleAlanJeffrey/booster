@@ -8,7 +8,7 @@ from booster_robotics_sdk_python import (
     RemoteControllerState,
 )
 
-from .state_machine import FightingStateMachine
+from .state_machine import FightingStateMachine, RobotEvent
 from .lib import BoosterLowLevelController
 
 
@@ -46,11 +46,11 @@ if __name__ == "__main__":
         ev = rc.event
         if ev == EVENT_BTN_DN:
             if rc.x:
-                fight_sm.on_event("right_punch")
+                fight_sm.on_event(RobotEvent.RIGHT_PUNCH)
             elif rc.b:
-                fight_sm.on_event("left_punch")
+                fight_sm.on_event(RobotEvent.LEFT_PUNCH)
             elif rc.a:
-                fight_sm.on_event("block")
+                fight_sm.on_event(RobotEvent.BLOCK)
 
     sub = B1RemoteControllerStateSubscriber(on_remote)
     sub.InitChannel()
