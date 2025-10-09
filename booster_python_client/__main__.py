@@ -7,7 +7,7 @@ from booster_robotics_sdk_python import (
     RemoteControllerState,
 )
 
-from . import actions
+from .state_machine import FightingStateMachine
 from .lib import BoosterLowLevelController
 
 
@@ -25,20 +25,18 @@ EVENT_AXIS, EVENT_HAT, EVENT_BTN_DN, EVENT_BTN_UP, EVENT_REMOVE = (
 if __name__ == "__main__":
     robot = BoosterLowLevelController()
     robot.init(network_interface="")
-
-    robot.enable_arm_usage()
+    # robot.enable_arm_usage()
+    fight_sm = FightingStateMachine(robot, speed="medium", time_gap_s=0.05)
 
     def on_remote(rc: RemoteControllerState):
         ev = rc.event
         if ev == EVENT_BTN_DN:
             if rc.x:
-                robot.send_command(actions.RIGHT_PUNCH, speed="slow", time_gap_s=0.05)
+                fight_sm.on_event("right_punch")
             elif rc.b:
-                robot.send_command(actions.LEFT_PUNCH, speed="slow", time_gap_s=0.05)
-            if rc.a:
-                robot.send_command(actions.BLOCK, speed="fast", time_gap_s=0.05)
-            else:
-                robot.send_command(actions.NEUTRAL_POSE, speed="fast", time_gap_s=0.05)
+                fight_sm.on_event("left_punch")
+            elif rc.a:
+                fight_sm.on_event("block")
 
     sub = B1RemoteControllerStateSubscriber(on_remote)
     sub.InitChannel()
