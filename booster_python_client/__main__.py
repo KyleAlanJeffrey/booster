@@ -40,7 +40,7 @@ if __name__ == "__main__":
     robot = BoosterLowLevelController()
     robot.init(network_interface="")
     # robot.enable_arm_usage()
-    fight_sm = FightingStateMachine(robot, speed="medium", time_gap_s=0.05)
+    fight_sm = FightingStateMachine(robot, speed=args.speed, time_gap_s=0.05)
 
     def on_remote(rc: RemoteControllerState):
         ev = rc.event
