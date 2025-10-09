@@ -45,12 +45,16 @@ if __name__ == "__main__":
     def on_remote(rc: RemoteControllerState):
         ev = rc.event
         if ev == EVENT_BTN_DN:
-            if rc.x:
+            if rc.rt:
                 fight_sm.on_event(RobotEvent.RIGHT_PUNCH)
-            elif rc.b:
+            elif rc.rb:
+                fight_sm.on_event(RobotEvent.RIGHT_UPPERCUT)
+            elif rc.lt:
                 fight_sm.on_event(RobotEvent.LEFT_PUNCH)
             elif rc.a:
                 fight_sm.on_event(RobotEvent.BLOCK)
+            elif rc.b:
+                fight_sm.on_event(RobotEvent.VICTORY_POSE)
 
     sub = B1RemoteControllerStateSubscriber(on_remote)
     sub.InitChannel()

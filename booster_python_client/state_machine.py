@@ -14,7 +14,9 @@ logger = logging.getLogger("booster_python_client")
 class RobotEvent(Enum):
     LEFT_PUNCH = "left_punch"
     RIGHT_PUNCH = "right_punch"
+    RIGHT_UPPERCUT = "right_uppercut"
     BLOCK = "block"
+    VICTORY_POSE = "victory_pose"
 
 
 class RobotState(Enum):
@@ -36,7 +38,10 @@ class FightingStateMachine:
         self.time_gap_s = time_gap_s
         self.state = RobotState.FIGHT_STANCE
 
-    def _action(self, action: List[Dict[B1JointIndex, float]]):
+    def _action(self, action: List[Dict[B1JointIndex, float]], speed: SpeedType = None, time_gap_s: float = None):
+        if speed and time_gap_s:
+            self.booster.send_command(action, speed=speed, time_gap_s=time_gap_s)
+            return
         self.booster.send_command(action, speed=self.speed, time_gap_s=self.time_gap_s)
 
     def on_event(self, event: RobotEvent):
@@ -54,6 +59,10 @@ class FightingStateMachine:
             elif event == RobotEvent.RIGHT_PUNCH:
                 self._action(actions.RIGHT_PUNCH)
 
+            elif event == RobotEvent.RIGHT_UPPERCUT:
+                self._action(actions.RIGHT_UPPERCUT)
+            elif event == RobotEvent.VICTORY_POSE:
+                self._action(actions.VICTORY_ANIMATION, "slow", .2)
             else:
                 logger.info(f"Cant {event.value} while fighting!")
 
@@ -63,6 +72,7 @@ class FightingStateMachine:
             if event == RobotEvent.BLOCK:
                 self._action(actions.BLOCK_TO_FIGHT_POSE)
                 self.state = RobotState.FIGHT_STANCE
-
+            elif event == RobotEvent.VICTORY_POSE:
+                self._action(actions.VICTORY_ANIMATION)
             else:
                 logger.info(f"Can't {event.value} while blocking!")
