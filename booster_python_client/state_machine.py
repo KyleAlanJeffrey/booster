@@ -2,14 +2,24 @@ from enum import Enum
 import logging
 from typing import Dict, List
 
+from .helpers import fire_and_forget
 from .types import SpeedType
 from . import actions
 from .lib import BoosterLowLevelController
+from .fingerbot import FingerBot
 from booster_robotics_sdk_python import B1JointIndex
+from booster_robotics_sdk_python import ( RemoteControllerState)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("booster_python_client")
 
+EVENT_AXIS, EVENT_HAT, EVENT_BTN_DN, EVENT_BTN_UP, EVENT_REMOVE = (
+    0x600,
+    0x602,
+    0x603,
+    0x604,
+    0x606,
+)
 
 class RobotEvent(Enum):
     LEFT_PUNCH = "left_punch"
@@ -44,6 +54,7 @@ class FightingStateMachine:
             return
         self.booster.send_command(action, speed=self.speed, time_gap_s=self.time_gap_s)
 
+
     def on_event(self, event: RobotEvent):
 
         ######### Fighting state #########
@@ -76,3 +87,78 @@ class FightingStateMachine:
                 self._action(actions.VICTORY_ANIMATION)
             else:
                 logger.info(f"Can't {event.value} while blocking!")
+
+    def on_remote(self, rc: RemoteControllerState):
+        """Remote controller handler. This maps buttons to edges."""
+        ev = rc.event
+        if ev == EVENT_BTN_DN:
+            if rc.rt:
+                self.on_event(RobotEvent.RIGHT_PUNCH)
+            elif rc.rb:
+                self.on_event(RobotEvent.RIGHT_UPPERCUT)
+            elif rc.lt:
+                self.on_event(RobotEvent.LEFT_PUNCH)
+            elif rc.a:
+                self.on_event(RobotEvent.BLOCK)
+            elif rc.b:
+                self.on_event(RobotEvent.VICTORY_POSE)
+
+
+class CameraStateEvent(Enum):
+    TAKE_PICTURE = "take_picture"
+    SWITCH_MODE = "switch_mode"
+
+class CameraState(Enum):
+    SCANNING = "scanning"
+    FRAMING = "framing"
+
+class CameraStateMachine:
+    """"""
+
+    def __init__(
+        self,
+        booster: BoosterLowLevelController,
+        fingerbot: FingerBot,
+        speed: SpeedType = "slow",
+        time_gap_s: float = 0.05,
+    ):
+        self.booster = booster
+        self.fingerbot = fingerbot
+        self.speed = speed
+        self.time_gap_s = time_gap_s
+        self.state = CameraState.SCANNING
+
+    def _action(self, action: List[Dict[B1JointIndex, float]], speed: SpeedType = None, time_gap_s: float = None):
+        if speed and time_gap_s:
+            self.booster.send_command(action, speed=speed, time_gap_s=time_gap_s)
+            return
+        self.booster.send_command(action, speed=self.speed, time_gap_s=self.time_gap_s)
+
+    def tick(self):
+        if self.state == CameraState.SCANNING:
+            pass
+        elif self.state == CameraState.FRAMING:
+            pass
+
+    def on_event(self, event: CameraStateEvent):
+        ######### Scanning state #########
+        if self.state == CameraState.SCANNING:
+            if event == CameraStateEvent.TAKE_PICTURE:
+                fire_and_forget(self.fingerbot.finger)
+            elif event == CameraStateEvent.SWITCH_MODE:
+                self.state = CameraState.FRAMING
+
+        ######### Framing state #########
+        elif self.state == CameraState.FRAMING:
+            if event == CameraStateEvent.SWITCH_MODE:
+                self.state = CameraState.SCANNING
+
+    def on_remote(self, rc):
+        """Remote controller handler. This maps buttons to edges."""
+        ev = rc.event
+        if ev == EVENT_BTN_DN:
+            if rc.rb:
+                self.on_event(CameraStateEvent.TAKE_PICTURE)
+            elif rc.a:
+                self.on_event(CameraStateEvent.SWITCH_MODE)
+

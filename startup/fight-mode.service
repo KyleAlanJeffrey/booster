@@ -4,7 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/python3 -m /home/booster/Desktop/booster/booster_python_client
+ExecStart=/home/booster/Desktop/tuya-finger-bot/.venv/bin/python -m /home/booster/Desktop/booster/booster_python_client
 WorkingDirectory=/home/booster/Desktop/booster
 Restart=always
 Environment=PYTHONUNBUFFERED=1

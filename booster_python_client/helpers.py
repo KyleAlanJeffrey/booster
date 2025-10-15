@@ -36,3 +36,19 @@ def stringify_q_values(states: List[MotorState], indices: List[int]) -> str:
     for i in indices:
         q_values.append(states[i].q)
     return "(" + ", ".join([f"{q:.4f}" for q in q_values]) + ")"
+
+
+def fire_and_forget(callable, *args, **kwargs):
+    """Run a callable in the background, ignoring any exceptions."""
+    import threading
+    import logging
+
+    def wrapper():
+        try:
+            callable(*args, **kwargs)
+        except Exception as e:
+            logging.error(f"Error in fire_and_forget: {e}")
+
+    thread = threading.Thread(target=wrapper)
+    thread.daemon = True
+    thread.start()
