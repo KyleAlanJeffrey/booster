@@ -34,8 +34,10 @@ using booster_interface::msg::ImuState;
 using booster_interface::msg::CmdType;
 using booster_interface::msg::HandReplyData;
 using booster_interface::msg::HandReplyParam;
+using booster_interface::msg::RemoteControllerState;
 
 namespace booster::robot::b1 {
+
 class __attribute__((visibility("hidden"))) B1RemoteControllerStateSubscriber
     : public std::enable_shared_from_this<B1RemoteControllerStateSubscriber> {
 public:
@@ -45,14 +47,18 @@ public:
     void InitChannel() {
         pybind11::gil_scoped_release release;
         auto weak_this = std::weak_ptr<B1RemoteControllerStateSubscriber>(shared_from_this());
+
+        // NOTE: use the exact topic name you have on the robot
         channel_ptr_ = booster::robot::ChannelFactory::Instance()
-            ->CreateReader<booster_interface::msg::RemoteControllerState>(
+            ->CreateRecvChannel<booster_interface::msg::RemoteControllerState>(
                 channel_name_,
                 [weak_this](const void* msg) {
                     if (auto self = weak_this.lock()) {
                         pybind11::gil_scoped_acquire acquire;
-                        const auto* rc = static_cast<const booster_interface::msg::RemoteControllerState*>(msg);
-                        self->py_handler_(*rc);
+                        // pass pointer (consistent with B1LowStateSubscriber)
+                        const auto* rc =
+                            static_cast<const booster_interface::msg::RemoteControllerState*>(msg);
+                        self->py_handler_(rc);
                     }
                 }
             );
@@ -66,17 +72,15 @@ public:
         }
     }
 
-    // Small ergonomic alias so Python can call sub.close()
-    void close() { CloseChannel(); }
+    void close() { CloseChannel(); }  // ergonomic alias
 
     const std::string& GetChannelName() const { return channel_name_; }
 
 private:
     ChannelPtr<booster_interface::msg::RemoteControllerState> channel_ptr_;
     pybind11::function py_handler_;
-    // If you already expose constants, feel free to swap this to a kTopic* constant.
-    // The SDK topics use "rt/..." elsewhere, so we follow that convention here:
-    const std::string channel_name_ = "rt/remote_controller_state";
+    // IMPORTANT: match the real topic you've seen in `ros2 topic info`
+    const std::string channel_name_ = "/remote_controller_state";
 };
 
 } // namespace booster::robot::b1
@@ -813,11 +817,8 @@ PYBIND11_MODULE(booster_robotics_sdk_python, m) {
         .def(py::init<RemoteControllerState>())
         // ints
         .def_property("event",
-                    (int32_t (RemoteControllerState::*)() const) &RemoteControllerState::event,
-                    (void (RemoteControllerState::*)(int32_t)) &RemoteControllerState::event)
-        .def_property("reserved",
-                    (int32_t (RemoteControllerState::*)() const) &RemoteControllerState::reserved,
-                    (void (RemoteControllerState::*)(int32_t)) &RemoteControllerState::reserved)
+                    (u_int32_t (RemoteControllerState::*)() const) &RemoteControllerState::event,
+                    (void (RemoteControllerState::*)(u_int32_t)) &RemoteControllerState::event)
         // floats
         .def_property("lx",
                     (float (RemoteControllerState::*)() const) &RemoteControllerState::lx,
