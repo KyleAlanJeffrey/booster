@@ -13,6 +13,7 @@ static const std::string kTopicFallDown = "rt/fall_down";
 static const std::string kTopicOdometerState = "rt/odometer_state";
 static const std::string kTopicBoosterHandData = "rt/booster_hand_data";
 static const std::string kTopicTF = "rt/tf";
+static const std::string kTopicRemoteControllerState = "rt/remote_controller_state";
 
 // TODO(@wuyuanye): 按照结构图，把电机的索引完善
 enum class JointIndex {
