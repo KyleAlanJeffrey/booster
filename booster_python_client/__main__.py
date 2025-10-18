@@ -8,6 +8,8 @@ from booster_robotics_sdk_python import (
     RemoteControllerState,
 )
 
+from .helpers import play_sound
+
 from .state_machine import CameraStateEvent, FightingStateMachine, CameraStateMachine
 from .lib import BoosterLowLevelController
 from .fingerbot import connect_to_kyles_fingerbot
@@ -52,10 +54,16 @@ if __name__ == "__main__":
         robot.init(network_interface="")
 
         if args.mode == 'fight':
+            logger.info("Using fight mode")
+            play_sound("/home/booster/Desktop/sounds/boxing-bell.wav")
             sm = FightingStateMachine(robot, speed=args.speed, time_gap_s=0.05)
         else:
-            fingerbot = connect_to_kyles_fingerbot()
-            sm = CameraStateMachine(robot, fingerbot, speed=args.speed, time_gap_s=0.05)
+            logger.info("Using camera mode")
+            try:
+                fingerbot = connect_to_kyles_fingerbot()
+                sm = CameraStateMachine(robot, fingerbot, speed='slow', time_gap_s=0.05)
+            except Exception as e:
+                logger.warning(f"Failed to connect to fingerbot: {e}")
 
         sub = B1RemoteControllerStateSubscriber(sm.on_remote)
         sub.InitChannel()
@@ -75,7 +83,7 @@ if __name__ == "__main__":
     finally:
         # Always clean up no matter how we exit
         try:
-            # fingerbot.disconnect()
+            fingerbot.disconnect()
             sub.close()
         except Exception as e:
             logger.error("Close error:", e)

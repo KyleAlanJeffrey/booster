@@ -6,6 +6,9 @@ from Crypto.Cipher import AES
 from struct import pack, unpack
 from enum import Enum
 from binascii import hexlify
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Coder(Enum):
@@ -309,17 +312,17 @@ class FingerBot:
         connection_timeout_s = 10
         while not self.paired:
             if time.time() - start_time > connection_timeout_s:
-                print('Connection timed out!')
+                logger.error('Connection timed out!')
                 return False
             time.sleep(1)
         return True
 
     def finger(self):
         if not self.paired:
-            print('Device not paired')
+            logger.error('Device not paired')
             return
 
-        print('Finger...')
+        logger.info('Fingering...')
         req = self.send_dps([])
         self.send_request(req)
 
@@ -339,11 +342,11 @@ class FingerBot:
         if ret.code == Coder.FUN_SENDER_DEVICE_INFO:
             self.secret_key_manager.setSrand(ret.resp.srand)
 
-            print('Pairing...')
+            logger.info('Pairing to Fingerbot...')
             req = self.pair_request()
             self.send_request(req)
         elif ret.code == Coder.FUN_SENDER_PAIR:
-            print('Paired!')
+            logger.info('Paired!')
             self.paired = True
 
     def send_request(self, xrequest):
@@ -422,6 +425,7 @@ class FingerBot:
 
 
 def connect_to_kyles_fingerbot():
+    logger.info("Connecting to Kyle's fingerbot...")
     LOCAL_KEY = "yK2Ki5O8&*&T)uP?"
     MAC = "DC:23:52:10:34:55"
     UUID = "uuid8ec0b0bb5de0"

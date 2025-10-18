@@ -52,3 +52,8 @@ def fire_and_forget(callable, *args, **kwargs):
     thread = threading.Thread(target=wrapper)
     thread.daemon = True
     thread.start()
+
+def play_sound(file_path: str):
+    """Play a sound file using the system's default player."""
+    import subprocess
+    subprocess.run(["aplay", file_path])

@@ -143,21 +143,25 @@ class CameraStateMachine:
     def on_event(self, event: CameraStateEvent):
         ######### Scanning state #########
         if self.state == CameraState.SCANNING:
-            if event == CameraStateEvent.TAKE_PICTURE:
-                fire_and_forget(self.fingerbot.finger)
-            elif event == CameraStateEvent.SWITCH_MODE:
+            if event == CameraStateEvent.SWITCH_MODE:
                 self.state = CameraState.FRAMING
+                self._action(actions.CAMERA_NEUTRAL_TO_TAKING_PHOTO)
 
         ######### Framing state #########
         elif self.state == CameraState.FRAMING:
             if event == CameraStateEvent.SWITCH_MODE:
                 self.state = CameraState.SCANNING
+                self._action(actions.TAKING_PHOTO_TO_CAMERA_NEUTRAL)
+            elif event == CameraStateEvent.TAKE_PICTURE:
+                self.fingerbot.finger()
 
-    def on_remote(self, rc):
+    def on_remote(self, rc: RemoteControllerState):
         """Remote controller handler. This maps buttons to edges."""
+        logger.info(f"RC State: {rc}")
         ev = rc.event
         if ev == EVENT_BTN_DN:
             if rc.rb:
+                logger.info("Taking picture!")
                 self.on_event(CameraStateEvent.TAKE_PICTURE)
             elif rc.a:
                 self.on_event(CameraStateEvent.SWITCH_MODE)
