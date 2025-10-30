@@ -1,14 +1,11 @@
 from enum import Enum
 import logging
-from typing import Dict, List
-
-from .helpers import fire_and_forget
+from typing import Dict, List, Any
 from .types import SpeedType
 from . import actions
 from .lib import BoosterLowLevelController
-from .fingerbot import FingerBot
 from booster_robotics_sdk_python import B1JointIndex
-from booster_robotics_sdk_python import ( RemoteControllerState)
+from booster_robotics_sdk_python import RemoteControllerState
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("booster_python_client")
@@ -20,6 +17,7 @@ EVENT_AXIS, EVENT_HAT, EVENT_BTN_DN, EVENT_BTN_UP, EVENT_REMOVE = (
     0x604,
     0x606,
 )
+
 
 class RobotEvent(Enum):
     LEFT_PUNCH = "left_punch"
@@ -48,12 +46,16 @@ class FightingStateMachine:
         self.time_gap_s = time_gap_s
         self.state = RobotState.FIGHT_STANCE
 
-    def _action(self, action: List[Dict[B1JointIndex, float]], speed: SpeedType = None, time_gap_s: float = None):
+    def _action(
+        self,
+        action: List[Dict[B1JointIndex, float]],
+        speed: SpeedType = None,
+        time_gap_s: float = None,
+    ):
         if speed and time_gap_s:
             self.booster.send_command(action, speed=speed, time_gap_s=time_gap_s)
             return
         self.booster.send_command(action, speed=self.speed, time_gap_s=self.time_gap_s)
-
 
     def on_event(self, event: RobotEvent):
 
@@ -73,7 +75,7 @@ class FightingStateMachine:
             elif event == RobotEvent.RIGHT_UPPERCUT:
                 self._action(actions.RIGHT_UPPERCUT)
             elif event == RobotEvent.VICTORY_POSE:
-                self._action(actions.VICTORY_ANIMATION, "slow", .2)
+                self._action(actions.VICTORY_ANIMATION, "slow", 0.2)
             else:
                 logger.info(f"Cant {event.value} while fighting!")
 
@@ -108,9 +110,11 @@ class CameraStateEvent(Enum):
     TAKE_PICTURE = "take_picture"
     SWITCH_MODE = "switch_mode"
 
+
 class CameraState(Enum):
     SCANNING = "scanning"
     FRAMING = "framing"
+
 
 class CameraStateMachine:
     """"""
@@ -118,17 +122,24 @@ class CameraStateMachine:
     def __init__(
         self,
         booster: BoosterLowLevelController,
-        fingerbot: FingerBot,
+        fingerbot: Any,
         speed: SpeedType = "slow",
         time_gap_s: float = 0.05,
     ):
+        from .fingerbot import FingerBot
+
         self.booster = booster
-        self.fingerbot = fingerbot
+        self.fingerbot: FingerBot = fingerbot
         self.speed = speed
         self.time_gap_s = time_gap_s
         self.state = CameraState.SCANNING
 
-    def _action(self, action: List[Dict[B1JointIndex, float]], speed: SpeedType = None, time_gap_s: float = None):
+    def _action(
+        self,
+        action: List[Dict[B1JointIndex, float]],
+        speed: SpeedType = None,
+        time_gap_s: float = None,
+    ):
         if speed and time_gap_s:
             self.booster.send_command(action, speed=speed, time_gap_s=time_gap_s)
             return
@@ -165,4 +176,3 @@ class CameraStateMachine:
                 self.on_event(CameraStateEvent.TAKE_PICTURE)
             elif rc.a:
                 self.on_event(CameraStateEvent.SWITCH_MODE)
-

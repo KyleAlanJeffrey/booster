@@ -5,14 +5,12 @@ import threading
 
 from booster_robotics_sdk_python import (
     B1RemoteControllerStateSubscriber,
-    RemoteControllerState,
 )
 
 from .helpers import play_sound
 
-from .state_machine import CameraStateEvent, FightingStateMachine, CameraStateMachine
+from .state_machine import FightingStateMachine, CameraStateMachine
 from .lib import BoosterLowLevelController
-from .fingerbot import connect_to_kyles_fingerbot
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("booster_python_client")
@@ -53,15 +51,17 @@ if __name__ == "__main__":
         robot = BoosterLowLevelController()
         robot.init(network_interface="")
 
-        if args.mode == 'fight':
+        if args.mode == "fight":
             logger.info("Using fight mode")
             play_sound("/home/booster/Desktop/sounds/boxing-bell.wav")
             sm = FightingStateMachine(robot, speed=args.speed, time_gap_s=0.05)
         else:
+            from .fingerbot import connect_to_kyles_fingerbot
+
             logger.info("Using camera mode")
             try:
                 fingerbot = connect_to_kyles_fingerbot()
-                sm = CameraStateMachine(robot, fingerbot, speed='slow', time_gap_s=0.05)
+                sm = CameraStateMachine(robot, fingerbot, speed="slow", time_gap_s=0.05)
             except Exception as e:
                 logger.warning(f"Failed to connect to fingerbot: {e}")
 
