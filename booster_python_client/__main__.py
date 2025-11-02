@@ -3,9 +3,7 @@ import logging
 import signal
 import threading
 
-from booster_robotics_sdk_python import (
-    B1RemoteControllerStateSubscriber,
-)
+from booster_robotics_sdk_python import B1RemoteControllerStateSubscriber, RobotMode
 
 from .helpers import play_sound
 
@@ -53,7 +51,7 @@ if __name__ == "__main__":
 
         if args.mode == "fight":
             logger.info("Using fight mode")
-            play_sound("/home/booster/Desktop/sounds/boxing-bell.wav")
+            play_sound("opening-bell.wav")
             sm = FightingStateMachine(robot, speed=args.speed, time_gap_s=0.05)
         else:
             from .fingerbot import connect_to_kyles_fingerbot
@@ -83,7 +81,8 @@ if __name__ == "__main__":
     finally:
         # Always clean up no matter how we exit
         try:
-            fingerbot.disconnect()
+            if args.mode == "camera":
+                fingerbot.disconnect()
             sub.close()
         except Exception as e:
             logger.error("Close error:", e)

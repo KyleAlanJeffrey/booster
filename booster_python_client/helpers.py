@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, List, Tuple
 
 from booster_robotics_sdk_python import (
@@ -53,7 +54,11 @@ def fire_and_forget(callable, *args, **kwargs):
     thread.daemon = True
     thread.start()
 
-def play_sound(file_path: str):
+
+def play_sound(sounds_file: str):
     """Play a sound file using the system's default player."""
     import subprocess
-    subprocess.run(["aplay", file_path])
+
+    curr_dir = Path(__file__).parent
+    file_path = curr_dir / "sounds" / sounds_file
+    subprocess.run(["aplay", file_path.absolute()])
