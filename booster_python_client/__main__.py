@@ -37,6 +37,12 @@ if __name__ == "__main__":
         default="fight",
         help="Robot mode (fight, camera)",
     )
+    parser.add_argument(
+        "--network-interface",
+        type=str,
+        default="127.0.0.1",
+        help="Network interface to use 127.0.0.1 or <interface>",
+    )
 
     args = parser.parse_args()
     logger.info(f"Using speed setting: {args.speed}")
@@ -47,7 +53,7 @@ if __name__ == "__main__":
     try:
 
         robot = BoosterLowLevelController()
-        robot.init(network_interface="")
+        robot.init(network_interface=args.network_interface)
 
         if args.mode == "fight":
             logger.info("Using fight mode")
