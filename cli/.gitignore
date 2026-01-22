@@ -1,0 +1,15 @@
+# Runtime data
+.venv
+*.egg-info
+build
+__pycache__
+node_modules
+frontend/src/fleet_status/data/*.json
+scripts/plantcount
+plant_counts.json
+output
+confluence.token.json
+*datasets.json
+venv
+test_data
+.coverage
