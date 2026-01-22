@@ -16,17 +16,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Global link libs for your examples (as in your original)
 link_libraries(booster_robotics_sdk.a fastrtps fastcdr libfoonathan_memory-0.7.3.a)
 
-# ---- Executables (unchanged) ----
-add_executable(b1_loco_example_client          example/high_level/b1_loco_example_client.cpp)
-add_executable(b1_arm_sdk_example_client       example/high_level/b1_arm_sdk_example.cpp)
-add_executable(b1_7dof_arm_sdk_example_client  example/high_level/b1_7dof_arm_sdk_example.cpp)
-add_executable(b1_low_level_publisher          example/low_level/low_level_publisher.cpp)
-add_executable(b1_low_level_subscriber         example/low_level/low_level_subscriber.cpp)
-add_executable(low_level_hand_data_subscriber  example/low_level/low_level_hand_data_subscriber.cpp)
-add_executable(b1_low_sdk_example              example/low_level/b1_low_sdk_example.cpp)
-add_executable(b1_7dof_arm_low_sdk_example     example/low_level/b1_7dof_arm_low_sdk_example.cpp)
-add_executable(odometer_example                example/low_level/odometer_example.cpp)
-
 # FIX: use ${...}, not $(...)
 include_directories(BEFORE ${PROJECT_SOURCE_DIR}/include)
 
