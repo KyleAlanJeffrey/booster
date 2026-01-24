@@ -176,3 +176,65 @@ class CameraStateMachine:
                 self.on_event(CameraStateEvent.TAKE_PICTURE)
             elif rc.a:
                 self.on_event(CameraStateEvent.SWITCH_MODE)
+
+
+class FootballStateEvent(Enum):
+    SWITCH_STANCE = "switch_stance"
+    THROW = "throw"
+
+class FootballState(Enum):
+    NEUTRAL = "neutral"
+    READY = "ready"
+
+
+class FootballStateMachine:
+    """"""
+
+    def __init__(
+        self,
+        booster: BoosterLowLevelController,
+        speed: SpeedType = "slow",
+        time_gap_s: float = 0.05,
+    ):
+
+        self.booster = booster
+        self.speed = speed
+        self.time_gap_s = time_gap_s
+        self.state = FootballState.NEUTRAL
+        self.booster.enable_upper_body_usage()
+
+    def _action(
+        self,
+        action: List[Dict[B1JointIndex, float]],
+        speed: SpeedType = None,
+        time_gap_s: float = None,
+    ):
+        if speed and time_gap_s:
+            self.booster.send_command(action, speed=speed, time_gap_s=time_gap_s)
+            return
+        self.booster.send_command(action, speed=self.speed, time_gap_s=self.time_gap_s)
+
+
+    def on_event(self, event: FootballStateEvent):
+        if self.state == FootballState.NEUTRAL:
+            if event == FootballStateEvent.SWITCH_STANCE:
+                self.state = FootballState.READY
+                self._action(actions.FOOTBALL_NEUTRAL_TO_READY)
+
+        elif self.state == FootballState.READY:
+            if event == FootballStateEvent.SWITCH_STANCE:
+                self.state = FootballState.NEUTRAL
+                self._action(actions.FOOTBALL_READY_TO_NEUTRAL)
+            elif event == FootballStateEvent.THROW:
+                self._action(actions.FOOTBALL_THROW_TO_READY)
+
+    def on_remote(self, rc: RemoteControllerState):
+        """Remote controller handler. This maps buttons to edges."""
+        logger.info(f"RC State: {rc}")
+        ev = rc.event
+        if ev == EVENT_BTN_DN:
+            if rc.rt:
+                logger.info("Throwing football!")
+                self.on_event(FootballStateEvent.THROW)
+            elif rc.rb:
+                self.on_event(FootballStateEvent.SWITCH_STANCE)

@@ -7,7 +7,7 @@ from booster_robotics_sdk_python import B1RemoteControllerStateSubscriber, Robot
 
 from .helpers import play_sound
 
-from .state_machine import FightingStateMachine, CameraStateMachine
+from .state_machine import FightingStateMachine, CameraStateMachine, FootballStateMachine
 from .lib import BoosterLowLevelController
 
 logging.basicConfig(level=logging.INFO)
@@ -48,8 +48,8 @@ if __name__ == "__main__":
     logger.info(f"Using speed setting: {args.speed}")
     if args.speed not in ("slow", "medium", "fast"):
         raise ValueError("Invalid speed setting. Must be 'slow', 'medium', or 'fast'")
-    if args.mode not in ("fight", "camera"):
-        raise ValueError("Invalid mode setting. Must be 'fight' or 'camera'")
+    if args.mode not in ("fight", "camera", "football"):
+        raise ValueError("Invalid mode setting. Must be 'fight', 'camera', or 'football'")
     try:
 
         robot = BoosterLowLevelController()
@@ -59,15 +59,23 @@ if __name__ == "__main__":
             logger.info("Using fight mode")
             play_sound("opening-bell.wav")
             sm = FightingStateMachine(robot, speed=args.speed, time_gap_s=0.05)
-        else:
+        elif args.mode == "camera":
             from .fingerbot import connect_to_kyles_fingerbot
-
             logger.info("Using camera mode")
             try:
                 fingerbot = connect_to_kyles_fingerbot()
-                sm = CameraStateMachine(robot, fingerbot, speed="slow", time_gap_s=0.05)
+                sm = CameraStateMachine(robot, fingerbot, speed=args.speed, time_gap_s=0.05)
             except Exception as e:
                 logger.warning(f"Failed to connect to fingerbot: {e}")
+
+        elif args.mode == "football":
+            logger.info("Using football mode")
+            try:
+                sm = FootballStateMachine(robot, speed=args.speed, time_gap_s=0.05)
+            except Exception as e:
+                logger.warning(f"Failed to initialize football state machine: {e}")
+        else:
+            raise ValueError("Invalid mode setting. Must be 'fight', 'camera', or 'football'")
 
         sub = B1RemoteControllerStateSubscriber(sm.on_remote)
         sub.InitChannel()

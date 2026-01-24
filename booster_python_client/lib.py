@@ -116,10 +116,6 @@ class BoosterLowLevelController:
         self.sub.InitChannel()
         self.loco_client = B1LocoClient()
         self.loco_client.Init()
-        time.sleep(1)  # wait for loco client to initialize
-        self.loco_client.ChangeMode(RobotMode.kWalking)
-        time.sleep(1)  # wait for loco client to initialize
-        self.loco_client.UpperBodyCustomControl(True)
 
         self._motor_command_states = (
             MotorCommandMaker.create_neutral_motor_cmds()
@@ -186,3 +182,11 @@ class BoosterLowLevelController:
         self.loco_client.ChangeMode(RobotMode.kPrepare)
         time.sleep(4)  # wait for mode change to take effect
         self.loco_client.SwitchHandEndEffectorControlMode(True)
+
+    def enable_upper_body_usage(self):
+        self.loco_client.ChangeMode(RobotMode.kPrepare)
+        time.sleep(2)  # wait for mode change to take effect
+        self.loco_client.ChangeMode(RobotMode.kWalking)
+        time.sleep(2)  # wait for mode change to take effect
+        self.loco_client.UpperBodyCustomControl(True)
+        time.sleep(1)  # wait for mode change to take effect
